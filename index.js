@@ -19,6 +19,7 @@ async function run() {
     await client.connect();
     console.log("Connected to MongoDB");
     const quizCollection = client.db("quizCollection").collection("quiz");
+    const answerCollection = client.db("quizCollection").collection("answer");
     // POST User : add a new user
     app.post("/quiz", async (req, res) => {
       const newQuiz = req.body;
@@ -26,10 +27,27 @@ async function run() {
       const result = await quizCollection.insertOne(newQuiz);
       res.send(result);
     });
+
+    // post answer : add a new answer
+    app.post("/answer", async (req, res) => {
+      const newAnswer = req.body;
+      console.log("adding new answer", newAnswer);
+      const result = await answerCollection.insertOne(newAnswer);
+      res.send(result);
+    });
+
     app.get("/quiz/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await quizCollection.findOne(query);
+
+      res.send(result);
+    });
+
+    app.get("/answer/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { uniqueId: id };
+      const result = await answerCollection.findOne(query);
 
       res.send(result);
     });
