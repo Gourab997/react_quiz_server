@@ -30,6 +30,7 @@ async function run() {
       const result = await quizCollection.insertOne(newQuiz);
       res.send(result);
     });
+
     app.get("/users/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
@@ -37,11 +38,14 @@ async function run() {
       let isAdmin=false;
       if (user?.role === "admin") {
         isAdmin = true;
+        res.json({ admin: isAdmin });
       } else {
         res.send("Your are not valid ");
       }
-      res.json({ admin: isAdmin });
+     
     });
+
+
     app.post("/users", async (req, res) => {
       const user = req.body;
       const result = await usersCollection.insertOne(user);
