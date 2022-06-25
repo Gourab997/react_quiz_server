@@ -18,14 +18,35 @@ async function run() {
   try {
     await client.connect();
     console.log("Connected to MongoDB");
-    const quizCollection = client.db("quizCollection").collection("quiz");
-    const answerCollection = client.db("quizCollection").collection("answer");
+    const database = client.db("quizCollection");
+
+    const quizCollection = database.collection("quiz");
+    const answerCollection = database.collection("answer");
+    const usersCollection = database.collection("users");
     // POST User : add a new user
     app.post("/quiz", async (req, res) => {
       const newQuiz = req.body;
       console.log("adding new user", newQuiz);
       const result = await quizCollection.insertOne(newQuiz);
       res.send(result);
+    });
+    app.get("/users/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      let isAdmin=false;
+      if (user?.role === "admin") {
+        isAdmin = true;
+      } else {
+        res.send("Your are not valid ");
+      }
+      res.json({ admin: isAdmin });
+    });
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      const result = await usersCollection.insertOne(user);
+      console.log(`user created with id: ${result.insertedId}`);
+      res.json(result);
     });
 
     // post answer : add a new answer
@@ -37,11 +58,16 @@ async function run() {
     });
 
     app.get("/quiz/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: ObjectId(id) };
-      const result = await quizCollection.findOne(query);
+   
+        const id = req.params.id;
+        if(id){
+        const query = { _id: ObjectId(id) };
+        const result = await quizCollection.findOne(query);
+        res.send(result);
+      }
+     
 
-      res.send(result);
+
     });
 
     app.get("/answer/:id", async (req, res) => {
