@@ -35,16 +35,14 @@ async function run() {
       const email = req.params.email;
       const query = { email: email };
       const user = await usersCollection.findOne(query);
-      let isAdmin=false;
+      let isAdmin = false;
       if (user?.role === "admin") {
         isAdmin = true;
         res.json({ admin: isAdmin });
       } else {
         res.send("Your are not valid ");
       }
-     
     });
-
 
     app.post("/users", async (req, res) => {
       const user = req.body;
@@ -62,16 +60,12 @@ async function run() {
     });
 
     app.get("/quiz/:id", async (req, res) => {
-   
-        const id = req.params.id;
-        if(id){
+      const id = req.params.id;
+      if (id) {
         const query = { _id: ObjectId(id) };
         const result = await quizCollection.findOne(query);
         res.send(result);
       }
-     
-
-
     });
 
     app.get("/answer/:id", async (req, res) => {
@@ -84,10 +78,44 @@ async function run() {
 
     // Get all users
     app.get("/quiz", async (req, res) => {
-      const cursor = quizCollection.find({});
+      const query = { isVisible: 1 };
+      const cursor = quizCollection.find(query);
 
       const quizs = await cursor.toArray();
       res.send(quizs);
+    });
+    app.get("/archive", async (req, res) => {
+      const query = { isVisible: 2 };
+      const cursor = quizCollection.find(query);
+
+      const archive = await cursor.toArray();
+      res.send(archive);
+    });
+    app.put("/delete/:id", async (req, res) => {
+      const id = req.params.id;
+
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          isVisible: 2,
+        },
+      };
+      const result = await quizCollection.updateOne(filter, updateDoc, options);
+      res.json(result);
+    });
+    app.put("/archive/:id", async (req, res) => {
+      const id = req.params.id;
+
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          isVisible: 1,
+        },
+      };
+      const result = await quizCollection.updateOne(filter, updateDoc, options);
+      res.json(result);
     });
     //get single user
   } finally {
