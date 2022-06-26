@@ -59,6 +59,12 @@ async function run() {
       res.send(result);
     });
 
+    //get all answers
+    app.get("/answer", async (req, res) => {
+      const answers = await answerCollection.find({}).toArray();
+      res.json(answers);
+    });
+
     app.get("/quiz/:id", async (req, res) => {
       const id = req.params.id;
       if (id) {
@@ -71,6 +77,13 @@ async function run() {
     app.get("/answer/:id", async (req, res) => {
       const id = req.params.id;
       const query = { uniqueId: id };
+      const result = await answerCollection.findOne(query);
+
+      res.send(result);
+    });
+    app.get("/user-answer/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
       const result = await answerCollection.findOne(query);
 
       res.send(result);
